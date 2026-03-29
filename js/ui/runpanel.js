@@ -1,11 +1,13 @@
 import { S } from '../core/state.js';
 import { CELL } from '../constants.js';
 import { bricks, kk, getCellH, pushHist } from '../core/history.js';
-import { draw2d } from '../render/draw2d.js';
+import { draw2d, detectRun, detectOpeningRun } from '../render/draw2d.js';
+import { build3d } from '../render/draw3d.js';
 import { updSt } from './statusbar.js';
-import { maxCourses } from './config.js';
+import { maxCourses, clampCourse, updCourseLabel } from './config.js';
+import { runPrimaryDir } from '../render/elevation.js';
 
-function recenter(){
+export function recenter(){
   const br=bricks();
   if(S.vistaMode==='3d'){
     // 3D: reset câmera para posição padrão
@@ -20,7 +22,7 @@ function recenter(){
     }
     return;
   }
-  if(S.vistaMode==='elev'&&!elevPicking){
+  if(S.vistaMode==='elev'&&!S.elevPicking){
     S.elevOx=0;S.elevOy=0;S.elevSc=1;draw2d();return;
   }
   if(!br.size){S.ox=cv2.width/2;S.oy=cv2.height/2;S.sc2=1;draw2d();return;}
@@ -42,7 +44,7 @@ function recenter(){
 document.getElementById('btn-recenter').addEventListener('click',recenter);
 document.getElementById('btn-ruler').addEventListener('click',toggleRuler);
 document.getElementById('elev-back').addEventListener('click',()=>{
-  elevPicking=true; S.currentElevId=null;
+  S.elevPicking=true; S.currentElevId=null;
   updElevTools(); draw2d();
 });
 document.getElementById('elev-flip').addEventListener('click',()=>{
@@ -50,14 +52,14 @@ document.getElementById('elev-flip').addEventListener('click',()=>{
   ev.sideSign*=-1;
   updElevTools();draw2d();
 });
-function toggleRuler(){if(S.heightMode)toggleHeightMode();S.rulerOn=!S.rulerOn;S.rPt1=null;S.snapPt=null;if(!S.rulerOn){S.hovDim=-1;S.selDim=-1;}document.getElementById('btn-ruler').classList.toggle('active',S.rulerOn);cv2.classList.toggle('ruler-mode',S.rulerOn);document.getElementById('st-ruler-hint').style.display=S.rulerOn?'':'none';document.getElementById('st-ruler-hint').textContent='clique no 1º ponto';draw2d();}
+export function toggleRuler(){if(S.heightMode)toggleHeightMode();S.rulerOn=!S.rulerOn;S.rPt1=null;S.snapPt=null;if(!S.rulerOn){S.hovDim=-1;S.selDim=-1;}document.getElementById('btn-ruler').classList.toggle('active',S.rulerOn);cv2.classList.toggle('ruler-mode',S.rulerOn);document.getElementById('st-ruler-hint').style.display=S.rulerOn?'':'none';document.getElementById('st-ruler-hint').textContent='clique no 1º ponto';draw2d();}
 document.getElementById('btn-height').addEventListener('click',toggleHeightMode);
-function toggleHeightMode(){if(S.rulerOn)toggleRuler();S.heightMode=!S.heightMode;S.hovRun=[];document.getElementById('btn-height').classList.toggle('active',S.heightMode);cv2.classList.toggle('height-mode',S.heightMode);document.getElementById('st-height-hint').style.display=S.heightMode?'':'none';if(!S.heightMode)closeHpop();draw2d();}
+export function toggleHeightMode(){if(S.rulerOn)toggleRuler();S.heightMode=!S.heightMode;S.hovRun=[];document.getElementById('btn-height').classList.toggle('active',S.heightMode);cv2.classList.toggle('height-mode',S.heightMode);document.getElementById('st-height-hint').style.display=S.heightMode?'':'none';if(!S.heightMode)closeHpop();draw2d();}
 
 // ── Run selection ──────────────────────────────────
 const HANDLE_PX = 10; // raio do handle em pixels de tela
 
-function selectRun(col, row){
+export function selectRun(col, row){
   S.selectedRunType = 'wall';
   S.selectedRun = detectRun(col, row);
   if(!S.selectedRun.length){ deselectRun(); return; }
@@ -66,7 +68,7 @@ function selectRun(col, row){
   draw2d();
 }
 
-function selectOpeningRun(col, row){
+export function selectOpeningRun(col, row){
   S.selectedRunType = 'opening';
   S.selectedRun = detectOpeningRun(col, row);
   if(!S.selectedRun.length){ deselectRun(); return; }
@@ -75,14 +77,14 @@ function selectOpeningRun(col, row){
   draw2d();
 }
 
-function deselectRun(){
+export function deselectRun(){
   S.selectedRun = [];
   S.stretchMode = false;
   document.getElementById('run-panel').classList.remove('visible');
   draw2d();
 }
 
-function posRunPanel(){
+export function posRunPanel(){
   if(!S.selectedRun.length) return;
   const panel = document.getElementById('run-panel');
   const n = S.selectedRun.length;
@@ -134,7 +136,7 @@ function _runAvgHeight(run){
 }
 
 // Retorna 'start'|'end'|null se (sx,sy) de tela acerta um handle do run selecionado
-function hitTestRunHandle(sx, sy){
+export function hitTestRunHandle(sx, sy){
   if(!S.selectedRun.length) return null;
   const HPXL = HANDLE_PX + 6;
   const ends = [
@@ -152,7 +154,7 @@ function hitTestRunHandle(sx, sy){
 // Aplica stretch: dada a posição de tela (sx,sy) calcula a nova ponta do run.
 // Para paredes: atualiza S.hist[S.hi]. Para aberturas: atualiza S.openMap.
 // Parte sempre da base capturada no início do stretch → zero acúmulo entre frames.
-function applyStretch(sx, sy){
+export function applyStretch(sx, sy){
   const wx = (sx-S.ox)/S.sc2/CELL, wy = (sy-S.oy)/S.sc2/CELL;
   const fixed = S.stretchEnd==='start'
     ? S.stretchRun[S.stretchRun.length-1]
@@ -228,7 +230,7 @@ document.getElementById('rp-delete').addEventListener('click',()=>{
 
 // height popup
 let hpopRun=[];
-function openHpop(col,row,sx,sy){
+export function openHpop(col,row,sx,sy){
   hpopRun=detectRun(col,row);
   const n=hpopRun.length;
   document.getElementById('hp-title').textContent=`Altura — ${n} célula${n>1?'s':''}`;
@@ -252,7 +254,7 @@ function openHpop(col,row,sx,sy){
   posPopup('hpop',sx,sy);
   setTimeout(()=>{document.getElementById('hp-val').focus();document.getElementById('hp-val').select();},20);
 }
-function closeHpop(){document.getElementById('hpop').style.display='none';hpopRun=[];}
+export function closeHpop(){document.getElementById('hpop').style.display='none';hpopRun=[];}
 function applyHpop(){
   const v=parseFloat(document.getElementById('hp-val').value);
   if(isNaN(v)||v<5||v>600){appAlert('Altura deve ser entre 5 e 600 cm.');return;}
@@ -291,7 +293,7 @@ document.querySelectorAll('input[name=hpmode]').forEach(r=>{
       document.getElementById('hp-val2').value=document.getElementById('hp-val').value;
   });
 });
-function posPopup(id,sx,sy){const pop=document.getElementById(id);pop.style.display='block';const pw=pop.offsetWidth,ph=pop.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;let px=sx+12,py=sy-ph/2;if(px+pw>vw-8)px=sx-pw-12;if(py<8)py=8;if(py+ph>vh-8)py=vh-ph-8;pop.style.left=px+'px';pop.style.top=py+'px';}
+export function posPopup(id,sx,sy){const pop=document.getElementById(id);pop.style.display='block';const pw=pop.offsetWidth,ph=pop.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;let px=sx+12,py=sy-ph/2;if(px+pw>vw-8)px=sx-pw-12;if(py<8)py=8;if(py+ph>vh-8)py=vh-ph-8;pop.style.left=px+'px';pop.style.top=py+'px';}
 
 // ═══════════════════════════════════════════════════
 // 3D ENGINE

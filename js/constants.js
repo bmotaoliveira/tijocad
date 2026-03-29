@@ -32,3 +32,10 @@ const TYPE_HOLE = {
 
 
 export { CELL, BG, GRID, HOVER_C, BRICK_C, BRICK_HC, HOLE_C, PREV_C, PREV_INV, OPEN_C, OPEN_HC, RUN_HL, DIM_C, GROUT_C, REBAR_C, TYPE_COLOR, TYPE_HOLE };
+
+export const EBOX_TYPES = {
+  '4x2': { wCm: 10.2, hCm: 5.1,  depthCm: 5.0, label: 'Caixa 4×2"' },
+  '4x4': { wCm: 10.2, hCm: 10.2, depthCm: 5.0, label: 'Caixa 4×4"' },
+  'qd':  { wCm: 30,   hCm: 40,   depthCm: 12,  label: 'Quadro Dist.' },
+};
+export const EBOX_HEIGHTS = { '30':100, '100':100, '180':180, 'custom':100 };

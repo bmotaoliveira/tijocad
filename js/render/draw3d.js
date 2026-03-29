@@ -1,5 +1,5 @@
 import { S } from '../core/state.js';
-import { CELL, BRICK_C, GROUT_C, REBAR_C } from '../constants.js';
+import { CELL, BRICK_C, GROUT_C, REBAR_C, EBOX_TYPES } from '../constants.js';
 import { bricks, kk, getCellH } from '../core/history.js';
 import { analyzeCourse, computeGrauteCells, computeGrampos, globalCanalCourses, grampoLenM, countGrampos } from '../engine/modulation.js';
 import { CONDUIT_CFG } from '../engine/conduits.js';
@@ -9,7 +9,7 @@ import { draw2d } from './draw2d.js';
 // Modo 3D
 // ═══════════════════════════════════════════════════
 // Modo 3D
-function init3d(){
+export function init3d(){
   const div=document.getElementById('div3d'),W=div.offsetWidth,H=div.offsetHeight;
   if(S.r3){S.r3.setSize(W,H);S.c3.aspect=W/H;S.c3.updateProjectionMatrix();return;}
   S.r3=new THREE.WebGLRenderer({antialias:true});S.r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -56,7 +56,7 @@ function init3d(){
 window.addEventListener('mousemove',e=>{if(!S.is3d||(!S.m3.lb&&!S.m3.rb))return;const dx=e.clientX-S.m3.x,dy=e.clientY-S.m3.y;S.m3.x=e.clientX;S.m3.y=e.clientY;if(S.m3.lb){S.th3-=dx*.008;S.ph3-=dy*.008;}else if(S.m3.rb){const rx=Math.cos(S.th3),rz=-Math.sin(S.th3),spd=S.rad3*.0012;S.tgt3x-=rx*dx*spd;S.tgt3z-=rz*dx*spd;S.tgt3y+=dy*spd;}});
 window.addEventListener('mouseup',()=>{S.m3.lb=false;S.m3.rb=false;});
 
-function build3d(skipCameraReset=false){
+export function build3d(skipCameraReset=false){
   if(!S.s3)return;
   const rem=[];S.s3.children.forEach(c=>{if(c.userData.dyn)rem.push(c);});
   rem.forEach(c=>{S.s3.remove(c);if(c.geometry)c.geometry.dispose();if(c.material){if(Array.isArray(c.material))c.material.forEach(m=>m.dispose());else c.material.dispose();}});
@@ -321,3 +321,10 @@ function build3d(skipCameraReset=false){
           mesh.position.set(px, yc, fz);
           mesh.rotation.y = eb.face > 0 ? 0 : Math.PI;
         } else {
+
+export function resize3d(){
+  if(!S.r3)return;
+  const div=document.getElementById('div3d'),W=div.offsetWidth,H=div.offsetHeight;
+  if(!W||!H)return;
+  S.r3.setSize(W,H);S.c3.aspect=W/H;S.c3.updateProjectionMatrix();
+}

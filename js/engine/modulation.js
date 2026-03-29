@@ -2,7 +2,7 @@ import { S } from '../core/state.js';
 import { CELL, TYPE_COLOR, TYPE_HOLE, GROUT_C } from '../constants.js';
 import { bricks, kk, getCellH } from '../core/history.js';
 
-function cellDir(col, row, cIdx, br){
+export function cellDir(col, row, cIdx, br){
   const hL=br.has(kk(col-1,row)), hR=br.has(kk(col+1,row));
   const vU=br.has(kk(col,row-1)), vD=br.has(kk(col,row+1));
   const isH=hL||hR, isV=vU||vD;
@@ -47,7 +47,7 @@ const STD_TOL = 5;
 // Global canaleta courses: apply to ALL wall cells at that height.
 // Always includes structural courses at ~110 and ~210 cm even without openings.
 // Opening-triggered global courses added when opening heights ≈ standard.
-function globalCanalCourses(){
+export function globalCanalCourses(){
   const g = new Set();
   // Always-on structural travamento courses
   const sillC = Math.round(S.stdSill / S.brickHCm) - 1; // course whose top ≈ peitoril padrão
@@ -74,7 +74,7 @@ function globalCanalCourses(){
 //   Cruzamento → 5 células: junção + 4 vizinhos
 //   Abertura   → 2 células por borda (inferior e superior) adjacentes ao vão
 //
-function computeGrauteCells(){
+export function computeGrauteCells(){
   const br = bricks();
   const grout = new Set();
 
@@ -175,7 +175,7 @@ const GRAMPO_H4 = 210;  // cm — canaleta de verga (STD_HEAD)
 
 // Retorna array de {cells: [k1,k2], dir:'H'|'V'} para cada grampo
 // cells = as 2 células que recebem as pernas do U
-function computeGrampos(){
+export function computeGrampos(){
   const br = bricks();
   const grampos = [];
 
@@ -261,7 +261,7 @@ function computeGrampos(){
 }
 
 // Retorna Set<"col,row"> de células que recebem grampo nas fiadas ativas (cIdx)
-function computeGrampoCellsForCourse(cIdx){
+export function computeGrampoCellsForCourse(cIdx){
   const gc1 = Math.floor(GRAMPO_H1 / S.brickHCm);
   const gc2 = Math.floor(GRAMPO_H2 / S.brickHCm);
   const gc3 = Math.floor(GRAMPO_H3 / S.brickHCm);
@@ -275,12 +275,12 @@ function computeGrampoCellsForCourse(cIdx){
 }
 
 // Comprimento de um grampo em metros
-function grampoLenM(){
+export function grampoLenM(){
   return S.cellCm === 15 ? 0.50 : 0.40;
 }
 
 // Total de grampos no projeto (para quantitativo)
-function countGrampos(){
+export function countGrampos(){
   const br=bricks();
   if(!br.size) return {count:0, totalLenM:0};
   const gc1=Math.floor(GRAMPO_H1/S.brickHCm);
@@ -386,7 +386,7 @@ function countGrampos(){
 // Cantos adjacentes (conectados por parede reta) recebem:
 //   mesma dir se distância PAR, dir oposta se distância ÍMPAR.
 // Isso garante que todo segmento entre cantos L tem comprimento par → 0 orphans.
-function assignCornerDirs(active, cIdx) {
+export function assignCornerDirs(active, cIdx) {
   // Encontrar todos os cantos L: exatamente 1 vizinho H e 1 vizinho V
   const corners = new Set();
   active.forEach((c, k) => {
@@ -444,7 +444,7 @@ function assignCornerDirs(active, cIdx) {
   });
 }
 
-function analyzeCourse(cIdx){
+export function analyzeCourse(cIdx){
   const result = new Map();
   const br = bricks();
   const globalCanal = globalCanalCourses();
@@ -764,13 +764,3 @@ function analyzeCourse(cIdx){
 
   return result;
 }
-
-
-
-// ═══════════════════════════════════════════════════
-// ELEVATION ENGINE
-// ═══════════════════════════════════════════════════
-
-// elevPicking: true = mostrar planta com botões por run
-//              false = mostrar elevação do run selecionado
-let elevPicking = true;

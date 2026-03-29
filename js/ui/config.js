@@ -7,13 +7,13 @@ import { updSt } from './statusbar.js';
 import { setVista } from './subheader.js';
 import { buildElevButtons, clearElevButtons } from '../render/elevation.js';
 
-function maxCourses(){
+export function maxCourses(){
   let m=Math.max(1,Math.ceil(S.wallHCm/S.brickHCm));
   bricks().forEach(k=>{m=Math.max(m,Math.ceil(getCellH(k)/S.brickHCm));});
   return m;
 }
-function clampCourse(){S.currentCourse=Math.max(0,Math.min(S.currentCourse,maxCourses()-1));}
-function updCourseLabel(){
+export function clampCourse(){S.currentCourse=Math.max(0,Math.min(S.currentCourse,maxCourses()-1));}
+export function updCourseLabel(){
   const total=maxCourses();
   clampCourse();
   const botCm=Math.round(S.currentCourse*S.brickHCm);
@@ -31,7 +31,7 @@ document.getElementById('btn-next-c').addEventListener('click',()=>{const t=maxC
 
 // ── inputs ─────────────────────────────────────────
 // ── Atualizar info de tijolo no rodapé ─────────────
-function updSbBrickInfo(){
+export function updSbBrickInfo(){
   const sz=document.getElementById('sb-cell-sz');
   const bh=document.getElementById('sb-bh');
   const wh=document.getElementById('sb-wh');
@@ -138,7 +138,7 @@ document.getElementById('file-input').addEventListener('change',e=>{
 // ── Configurações do projeto ─────────────────────────
 
 // Sincroniza os value/title dos radio buttons dos popups com as vars globais
-function syncPopupPresets(){
+export function syncPopupPresets(){
   // Elétrica — atualiza value, title e texto visível do label
   const el = document.getElementById('ebh-low');
   const em = document.getElementById('ebh-mid');
@@ -162,7 +162,7 @@ function syncPopupPresets(){
 }
 
 // Abre o painel preenchendo com valores atuais
-function openCfgPanel(){
+export function openCfgPanel(){
   const r=document.querySelector(`input[name="cfg-bricksize"][value="${S.cellCm}"]`);
   if(r) r.checked=true;
   document.getElementById('cfg-bh').value=S.brickHCm;
@@ -177,20 +177,20 @@ function openCfgPanel(){
   document.getElementById('cfg-head').value=S.stdHead;
   document.getElementById('cfg-overlay').classList.add('visible');
 }
-function closeCfgPanel(){
+export function closeCfgPanel(){
   document.getElementById('cfg-overlay').classList.remove('visible');
 }
-function cfgClearErrors(){
+export function cfgClearErrors(){
   document.querySelectorAll('#cfg-panel .cfg-ninp').forEach(i=>i.classList.remove('cfg-error'));
   const msg=document.getElementById('cfg-validation-msg');
   msg.textContent=''; msg.classList.remove('visible');
 }
-function cfgShowError(ids, text){
+export function cfgShowError(ids, text){
   ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('cfg-error'); });
   const msg=document.getElementById('cfg-validation-msg');
   msg.textContent=text; msg.classList.add('visible');
 }
-function applyCfgPanel(){
+export function applyCfgPanel(){
   cfgClearErrors();
   const errors=[];
 

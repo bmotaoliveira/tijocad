@@ -3,7 +3,7 @@ import { CELL, BRICK_C, OPEN_C, GROUT_C, RUN_HL } from '../constants.js';
 import { bricks, kk, getCellH } from '../core/history.js';
 import { analyzeCourse, computeGrauteCells, globalCanalCourses } from '../engine/modulation.js';
 
-function elevRunKey(cells, dir){
+export function elevRunKey(cells, dir){
   if(!cells.length) return '';
   // Use canonical form: sort cells and use first cell after sort
   // This ensures the key is stable regardless of detection order
@@ -23,7 +23,7 @@ function elevRunKey(cells, dir){
 // Usada para parar o caminhamento na borda de cada run — impede que
 // o braço de uma cruz absorva o nó e o braço oposto na mesma passagem,
 // o que gerava 2 runs em vez de 3 para junções em cruz.
-function runPrimaryDir(col, row, br){
+export function runPrimaryDir(col, row, br){
   const hL=br.has(kk(col-1,row)), hR=br.has(kk(col+1,row));
   const vU=br.has(kk(col,row-1)), vD=br.has(kk(col,row+1));
   const isH=hL||hR, isV=vU||vD;
@@ -41,7 +41,7 @@ function runPrimaryDir(col, row, br){
   return hLen >= vLen ? 'H' : 'V';
 }
 
-function getAllRuns(){
+export function getAllRuns(){
   const br = bricks();
   const visited = new Set();
   const runs = [];
@@ -76,12 +76,12 @@ function getAllRuns(){
 }
 
 // ── Manage HTML overlay buttons ──────────────────────
-function clearElevButtons(){
+export function clearElevButtons(){
   const layer = document.getElementById('elev-btn-layer');
   if(layer) layer.innerHTML = '';
 }
 
-function buildElevButtons(){
+export function buildElevButtons(){
   clearElevButtons();
   const layer = document.getElementById('elev-btn-layer');
   const runs  = getAllRuns();
@@ -124,7 +124,7 @@ function buildElevButtons(){
     btn.addEventListener('click', e => {
       e.stopPropagation();
       S.currentElevId = ev.id;
-      elevPicking   = false;
+      S.elevPicking   = false;
       updElevTools();
       clearElevButtons();
       draw2d();
@@ -143,14 +143,14 @@ function buildElevButtons(){
   });
 }
 
-function updElevTools(){
+export function updElevTools(){
   const ev      = getCurrentElev();
   const lbl     = document.getElementById('elev-run-lbl');
   const sideLbl = document.getElementById('elev-side-lbl');
   const flipBtn = document.getElementById('elev-flip');
   const backBtn = document.getElementById('elev-back');
 
-  if(elevPicking || !ev){
+  if(S.elevPicking || !ev){
     lbl.textContent = 'Selecione uma parede';
     sideLbl.style.display = 'none';
     flipBtn.style.display  = 'none';
@@ -167,13 +167,13 @@ function updElevTools(){
   }
 }
 
-function getCurrentElev(){
+export function getCurrentElev(){
   return S.elevViews.find(e=>e.id===S.currentElevId) || null;
 }
 
 // ── draw2d hook: picking vs viewing ─────────────────
-function drawElevMode(){
-  if(elevPicking){
+export function drawElevMode(){
+  if(S.elevPicking){
     // Render the planta (re-use draw2d internals) then show buttons
     drawPlantaForElev();
     // Re-build buttons after draw (positions may have changed with pan/zoom)
@@ -186,7 +186,7 @@ function drawElevMode(){
 
 // Draws the planta view (bricks, openings, grid) for the elev picking state
 // Slightly dimmed so the buttons stand out
-function drawPlantaForElev(){
+export function drawPlantaForElev(){
   const W=S.cv2.width, H=S.cv2.height;
   S.cx2.clearRect(0,0,W,H);
   S.cx2.fillStyle=BG; S.cx2.fillRect(0,0,W,H);
@@ -228,7 +228,7 @@ function drawPlantaForElev(){
 }
 
 // ── Draw elevation on S.cv2 ─────────────────────────────
-function drawElevView(){
+export function drawElevView(){
   const W=S.cv2.width, H=S.cv2.height;
   S.cx2.clearRect(0,0,W,H);
   S.cx2.fillStyle='#f8f7f6'; S.cx2.fillRect(0,0,W,H);
@@ -579,7 +579,7 @@ function drawElevView(){
 }
 
 // Overlay na planta (quando em planta mode, mostra câmera do elev atual)
-function drawElevOverlay(){
+export function drawElevOverlay(){
   const ev=getCurrentElev();
   if(!ev||!ev.cells||!ev.cells.length) return;
   const cells=ev.cells;
@@ -592,18 +592,3 @@ function drawElevOverlay(){
   S.cx2.setLineDash([]);
   S.cx2.restore();
 }
-
-
-
-// ═══════════════════════════════════════════════════
-// CAIXA ELÉTRICA ENGINE
-// ═══════════════════════════════════════════════════
-const EBOX_TYPES = {
-  '4x2': { wCm: 10.2, hCm: 5.1,  depthCm: 5.0, label: 'Caixa 4×2"' },
-  '4x4': { wCm: 10.2, hCm: 10.2, depthCm: 5.0, label: 'Caixa 4×4"' },
-  'qd':  { wCm: 30,   hCm: 40,   depthCm: 12,  label: 'Quadro Dist.' },
-};
-const EBOX_HEIGHTS = { '30':100, '100':100, '180':180, 'custom':100 };
-
-let ebpopCell = null; // {col,row}
-let ebpopIdx  = -1;  // index into S.elecBoxes array for current cell (-1 = new)

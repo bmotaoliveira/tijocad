@@ -56,6 +56,7 @@ export const S = {
   // ── Elevation ─────────────────────────────────────────────────────────
   elevViews: [],
   currentElevId: null,
+  elevPicking: true,
   elevOx: 0,
   elevOy: 0,
   elevSc: 1,

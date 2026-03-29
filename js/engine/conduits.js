@@ -6,7 +6,7 @@ import { kk, bricks } from '../core/history.js';
 // hit-test, restrição de altura) está aqui. O restante da lógica é idêntico.
 // Tudo que difere entre 'elec' e 'pipe' (cor, espessura, mapa de terminais,
 // hit-test, restrição de altura) está aqui. O restante da lógica é idêntico.
-const CONDUIT_CFG = {
+export const CONDUIT_CFG = {
   elec: {
     termMap:      ()=> S.elecBoxes,
     hitTest:      (sx,sy)=> hitTestEbox(sx,sy),
@@ -61,11 +61,11 @@ const CONDUIT_CFG = {
   },
 };
 // Helper: retorna cfg para o subtool ativo (elec ou pipe)
-function _conduitCfg(ctype){ return CONDUIT_CFG[ctype] || CONDUIT_CFG.elec; }
+export function _conduitCfg(ctype){ return CONDUIT_CFG[ctype] || CONDUIT_CFG.elec; }
 
 // Verifica se uma célula está bloqueada para um conduíte na altura hCm.
 // Uma célula bloqueia se: (a) não é tijolo, ou (b) tem abertura cobrindo hCm.
-function _cellBlocksConduit(col, row, hCm, br){
+export function _cellBlocksConduit(col, row, hCm, br){
   const k=kk(col,row);
   if(!br.has(k)) return true;           // sem tijolo = descontinuidade
   const op=S.openMap[k];
@@ -77,7 +77,7 @@ function _cellBlocksConduit(col, row, hCm, br){
 
 // Constrói caminho reto verificando tijolos E aberturas na altura hCm.
 // Retorna [] se qualquer célula do caminho for inválida (incluindo ausente).
-function _conduitBuildPath(fc,fr,tc,tr, hCm){
+export function _conduitBuildPath(fc,fr,tc,tr, hCm){
   if(fc!==tc && fr!==tr) return [];
   const br=bricks(), path=[];
   if(fc===tc){
@@ -96,7 +96,7 @@ function _conduitBuildPath(fc,fr,tc,tr, hCm){
   return path;
 }
 
-function _conduitBuildLPath(fc,fr,cc,cr,tc,tr, hCm){
+export function _conduitBuildLPath(fc,fr,cc,cr,tc,tr, hCm){
   const leg1=_conduitBuildPath(fc,fr,cc,cr,hCm);
   const leg2=_conduitBuildPath(cc,cr,tc,tr,hCm);
   if(!leg1.length||!leg2.length) return [];
@@ -112,7 +112,7 @@ function _conduitBuildLPath(fc,fr,cc,cr,tc,tr, hCm){
 
 // Valid destinations from a terminal cell + index.
 // Usa CONDUIT_CFG para determinar: mapa de terminais, restrição de altura.
-function getValidDestinations(fromKey, fromBoxIdx, terminalMap, ctype){
+export function getValidDestinations(fromKey, fromBoxIdx, terminalMap, ctype){
   const cfg=_conduitCfg(ctype);
   terminalMap = terminalMap || cfg.termMap();
   const[fc,fr]=fromKey.split(',').map(Number);
@@ -168,7 +168,7 @@ function getValidDestinations(fromKey, fromBoxIdx, terminalMap, ctype){
   return dests;
 }
 
-function createConduit(fromKey, fromBoxIdx, dest, ctype, terminalMap){
+export function createConduit(fromKey, fromBoxIdx, dest, ctype, terminalMap){
   const cfg=_conduitCfg(ctype);
   terminalMap = terminalMap || cfg.termMap();
   const[fc,fr]=fromKey.split(',').map(Number);
@@ -198,7 +198,7 @@ function createConduit(fromKey, fromBoxIdx, dest, ctype, terminalMap){
 
 // Helper: given a mousedown on a cell that IS the pending origin,
 // decide which Z destination was intended based on click Y position within cell.
-function _pickZDest(sx, sy, validDests){
+export function _pickZDest(sx, sy, validDests){
   const zDests=validDests.filter(d=>d.kind==='Z');
   if(!zDests.length) return null;
   // Determine relative Y within the cell (0=top, 1=bottom)
@@ -213,7 +213,7 @@ function _pickZDest(sx, sy, validDests){
 // ── Hit-test para barrinhas de caixa na planta/inst ─────────────────────────
 // Retorna {key, boxIdx} se o ponto de tela (sx,sy) cai sobre uma barrinha,
 // ou null. Recria a mesma geometria do render para garantir consistência.
-function hitTestEbox(sx, sy){
+export function hitTestEbox(sx, sy){
   const wx=(sx-S.ox)/S.sc2, wy=(sy-S.oy)/S.sc2;
   const br=bricks();
   const GAP0=CELL*0.04, GAP1=CELL*0.035, BAR=CELL*0.26;
@@ -258,7 +258,7 @@ function hitTestEbox(sx, sy){
   return null;
 }
 // ── Desenha retângulo de destaque ao redor de uma barrinha ───────────────────
-function drawEboxHighlight(key, boxIdx, clr, lineW, dashLen){
+export function drawEboxHighlight(key, boxIdx, clr, lineW, dashLen){
   const br2=bricks();
   if(!br2.has(key)||!S.elecBoxes.has(key)) return;
   const[c,r]=key.split(',').map(Number);
@@ -287,7 +287,7 @@ function drawEboxHighlight(key, boxIdx, clr, lineW, dashLen){
   });
 }
 // Retorna geometria {bx,by,bw,bh} da barrinha em coords mundo, ou null
-function eboxBarRect(key, boxIdx){
+export function eboxBarRect(key, boxIdx){
   const br2=bricks(); if(!br2.has(key)||!S.elecBoxes.has(key)) return null;
   const[c,r]=key.split(',').map(Number);
   const wDir2=runPrimaryDir(c,r,br2);
@@ -314,7 +314,7 @@ function eboxBarRect(key, boxIdx){
 
 // Retorna Set<cellKey> de todas as células que têm conduíte horizontal (XY/L)
 // passando — essas canaletas NÃO levam graute no canal.
-function computeConduitCanalCells(){
+export function computeConduitCanalCells(){
   const s=new Set();
   S.conduits.filter(cd=>cd.axis==='XY'||cd.axis==='L').forEach(cd=>{
     cd.path.forEach(p=>s.add(kk(p.col,p.row)));
@@ -327,7 +327,7 @@ function computeConduitCanalCells(){
 // Largura da barrinha = diamMm/10 cm convertido em pixels (mínimo CELL*0.4).
 // Espessura (BAR), GAP0, GAP1 iguais.
 
-function _hydroBarGeom(c, r, hp, si, face, wDir){
+export function _hydroBarGeom(c, r, hp, si, face, wDir){
   const GAP0=CELL*0.04, GAP1=CELL*0.035, BAR=CELL*0.26;
   const pxPerCm=CELL/S.cellCm;
   const barLen=Math.max(CELL*0.4, hp.diamMm/10*pxPerCm*2);
@@ -349,7 +349,7 @@ function _hydroBarGeom(c, r, hp, si, face, wDir){
   return {bx,by,bw,bh};
 }
 
-function hitTestHydro(sx, sy){
+export function hitTestHydro(sx, sy){
   const wx=(sx-S.ox)/S.sc2, wy=(sy-S.oy)/S.sc2;
   const br=bricks();
   const pad=CELL*0.15;
@@ -371,7 +371,7 @@ function hitTestHydro(sx, sy){
   return null;
 }
 
-function drawHydroHighlight(key, boxIdx, clr, lineW, dashLen){
+export function drawHydroHighlight(key, boxIdx, clr, lineW, dashLen){
   const br2=bricks(); if(!br2.has(key)||!S.hydroPoints.has(key)) return;
   const[c,r]=key.split(',').map(Number);
   const wDir=runPrimaryDir(c,r,br2);
@@ -394,7 +394,7 @@ function drawHydroHighlight(key, boxIdx, clr, lineW, dashLen){
   });
 }
 
-function hydroBarRect(key, boxIdx){
+export function hydroBarRect(key, boxIdx){
   const br2=bricks(); if(!br2.has(key)||!S.hydroPoints.has(key)) return null;
   const[c,r]=key.split(',').map(Number);
   const wDir=runPrimaryDir(c,r,br2);
@@ -414,24 +414,24 @@ function hydroBarRect(key, boxIdx){
 }
 
 // ── Funções gás — mesma geometria do hidráulico, sobre S.gasPoints ──────────────
-function hitTestGas(sx,sy){
+export function hitTestGas(sx,sy){
   const saved=S.hydroPoints; S.hydroPoints=S.gasPoints;
   const r=hitTestHydro(sx,sy);
   S.hydroPoints=saved; return r;
 }
-function drawGasHighlight(key,boxIdx,clr,lineW,dashLen){
+export function drawGasHighlight(key,boxIdx,clr,lineW,dashLen){
   const saved=S.hydroPoints; S.hydroPoints=S.gasPoints;
   drawHydroHighlight(key,boxIdx,clr,lineW,dashLen);
   S.hydroPoints=saved;
 }
-function gasBarRect(key,boxIdx){
+export function gasBarRect(key,boxIdx){
   const saved=S.hydroPoints; S.hydroPoints=S.gasPoints;
   const r=hydroBarRect(key,boxIdx);
   S.hydroPoints=saved; return r;
 }
 
 // The course is determined by the box height of the conduit's origin box.
-function computeConduitCanalKeys(){
+export function computeConduitCanalKeys(){
   const m=new Map();
   S.conduits.filter(cd=>cd.axis==='XY'||cd.axis==='L').forEach(cd=>{
     const cIdx=Math.floor((cd.fromHeightCm??0)/S.brickHCm);

@@ -1,7 +1,15 @@
 import { S } from '../core/state.js';
-import { kk } from '../core/history.js';
-import { CELL } from '../constants.js';
+import { bricks, kk, pushHist } from '../core/history.js';
+import { CELL, EBOX_TYPES, EBOX_HEIGHTS } from '../constants.js';
 import { draw2d } from '../render/draw2d.js';
+import { build3d } from '../render/draw3d.js';
+import { updSt } from './statusbar.js';
+import { runPrimaryDir } from '../render/elevation.js';
+
+let ebpopCell = null; // {col,row}
+let ebpopIdx  = -1;  // index into S.elecBoxes array for current cell (-1 = new)
+
+function posPopup(id,sx,sy){const pop=document.getElementById(id);pop.style.display='block';const pw=pop.offsetWidth,ph=pop.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;let px=sx+12,py=sy-ph/2;if(px+pw>vw-8)px=sx-pw-12;if(py<8)py=8;if(py+ph>vh-8)py=vh-ph-8;pop.style.left=px+'px';pop.style.top=py+'px';}
 
 function ebBoxLabel(eb, i){
   const face = eb.face>0 ? 'A' : 'B';
@@ -50,7 +58,7 @@ function ebpopRebuildSel(arr){
   sel.value = ebpopIdx >= 0 ? ebpopIdx : '__new__';
 }
 
-function openEbpop(col, row, sx, sy){
+export function openEbpop(col, row, sx, sy){
   ebpopCell = {col, row};
   const k = kk(col, row);
   const arr = S.elecBoxes.get(k) || [];
@@ -93,7 +101,7 @@ document.getElementById('ebp-new').addEventListener('click',()=>{
   ebpopFill(null);
 });
 
-function closeEbpop(){
+export function closeEbpop(){
   document.getElementById('ebpop').style.display='none';
   ebpopCell=null; ebpopIdx=-1;
 }
@@ -237,9 +245,9 @@ function hypRebuildSel(arr){
   const on=document.createElement('option');on.value='__new__';on.textContent='+ Novo…';sel.appendChild(on);
   sel.value=hypopIdx>=0?hypopIdx:'__new__';
 }
-function openHydropop(col,row,sx,sy){ hypopIsNode=false; hypopIsGas=false; hypopMap=S.hydroPoints; _openHypopCommon(col,row,sx,sy); }
-function openNodepop(col,row,sx,sy){ hypopIsNode=true;  hypopIsGas=false; hypopMap=S.hydroPoints; _openHypopCommon(col,row,sx,sy); }
-function openGaspop(col,row,sx,sy){ hypopIsNode=false;  hypopIsGas=true;  hypopMap=S.gasPoints;   _openHypopCommon(col,row,sx,sy); }
+export function openHydropop(col,row,sx,sy){ hypopIsNode=false; hypopIsGas=false; hypopMap=S.hydroPoints; _openHypopCommon(col,row,sx,sy); }
+export function openNodepop(col,row,sx,sy){ hypopIsNode=true;  hypopIsGas=false; hypopMap=S.hydroPoints; _openHypopCommon(col,row,sx,sy); }
+export function openGaspop(col,row,sx,sy){ hypopIsNode=false;  hypopIsGas=true;  hypopMap=S.gasPoints;   _openHypopCommon(col,row,sx,sy); }
 function _openHypopCommon(col,row,sx,sy){
   hypopCell={col,row};
   const k=kk(col,row);
@@ -251,7 +259,7 @@ function _openHypopCommon(col,row,sx,sy){
   hypFill(hypopIdx>=0?allArr[hypopIdx]:null);
   posPopup('hydropop',sx,sy);
 }
-function closeHydropop(){document.getElementById('hydropop').style.display='none';hypopCell=null;hypopIdx=-1;hypopIsNode=false;hypopIsGas=false;hypopMap=null;}
+export function closeHydropop(){document.getElementById('hydropop').style.display='none';hypopCell=null;hypopIdx=-1;hypopIsNode=false;hypopIsGas=false;hypopMap=null;}
 
 document.getElementById('hyp-sel').addEventListener('change',function(){
   const k=kk(hypopCell.col,hypopCell.row);

@@ -9,6 +9,7 @@ import { bgHitTest, bgResizeHitTest, bgStartDrag, bgMoveDrag, bgEndDrag, loadIma
 import { getValidDestinations, createConduit, _pickZDest, CONDUIT_CFG } from '../engine/conduits.js';
 import { drawElevMode } from '../render/elevation.js';
 import { setVista, updInstHint, updZbtns } from '../ui/subheader.js';
+import { clampCourse, updCourseLabel } from '../ui/config.js';
 import { cv2, cx2 } from '../render/draw2d.js';
 
 function revitMove(run, dc, dr) {
@@ -231,7 +232,7 @@ cv2.addEventListener('mousedown',e=>{
   if(S.vistaMode==='elev'){
     if(e.button===1){
       e.preventDefault();
-      if(!elevPicking){
+      if(!S.elevPicking){
         S.elevPanning=true;S.elevPanSX=e.clientX;S.elevPanSY=e.clientY;
         S.elevPanOX=S.elevOx;S.elevPanOY=S.elevOy;cv2.classList.add('S.panning');
       }
@@ -550,7 +551,7 @@ window.addEventListener('mouseup',e=>{
 cv2.addEventListener('wheel',e=>{
   e.preventDefault();
   const rect=cv2.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top;
-  if(S.vistaMode==='elev'&&!elevPicking){
+  if(S.vistaMode==='elev'&&!S.elevPicking){
     const f=e.deltaY<0?1.15:1/1.15;
     const ns=Math.min(Math.max(S.elevSc*f,.1),12);
     S.elevOx=sx-(sx-S.elevOx)*(ns/S.elevSc);
@@ -566,7 +567,7 @@ cv2.addEventListener('wheel',e=>{
 
 // ── Elev pan with middle-button and wheel zoom ────────
 cv2.addEventListener('mousedown',e=>{
-  if(S.vistaMode!=='elev'||elevPicking) return;
+  if(S.vistaMode!=='elev'||S.elevPicking) return;
   if(e.button===1){
     e.preventDefault();
     S.elevPanning=true;
@@ -851,7 +852,7 @@ cv2.addEventListener('touchstart',e=>{
   e.preventDefault();
   if(S.vistaMode==='elev'){
     // Elevação: só pinch-zoom na vista de elevação renderizada
-    if(e.touches.length===2&&!elevPicking){
+    if(e.touches.length===2&&!S.elevPicking){
       touch2.isPinch=true;
       touch2.lastPinchDist=t2dist(e);
     } else if(e.touches.length===1){
@@ -898,7 +899,7 @@ cv2.addEventListener('touchmove',e=>{
     if(e.touches.length===2&&touch2.isPinch){
       const mid=t2mid(e);
       const d=t2dist(e);
-      if(!elevPicking){
+      if(!S.elevPicking){
         const f=d/touch2.lastPinchDist;
         const ns=Math.min(Math.max(S.elevSc*f,.1),12);
         S.elevOx=mid.x-(mid.x-S.elevOx)*(ns/S.elevSc);
@@ -909,7 +910,7 @@ cv2.addEventListener('touchmove',e=>{
       draw2d(); return;
     }
     // 1 dedo: pan na elevação renderizada
-    if(e.touches.length===1&&touch2.active&&!elevPicking){
+    if(e.touches.length===1&&touch2.active&&!S.elevPicking){
       const p=t2pos(e);
       const dx=p.cx-touch2.startX, dy=p.cy-touch2.startY;
       if(Math.sqrt(dx*dx+dy*dy)>TAP_THRESHOLD) touch2.moved=true;

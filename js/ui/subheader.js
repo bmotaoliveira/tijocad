@@ -1,12 +1,15 @@
 import { S } from '../core/state.js';
 import { CELL } from '../constants.js';
-import { draw2d } from '../render/draw2d.js';
-import { build3d, resize3d } from '../render/draw3d.js';
+import { bricks, pushHist } from '../core/history.js';
+import { draw2d, cv2, cx2 } from '../render/draw2d.js';
+import { init3d, build3d } from '../render/draw3d.js';
 import { updSt } from './statusbar.js';
-import { buildElevButtons, clearElevButtons } from '../render/elevation.js';
-import { cv2, cx2 } from '../render/draw2d.js';
+import { buildElevButtons, clearElevButtons, updElevTools } from '../render/elevation.js';
+import { _conduitCfg, createConduit, getValidDestinations } from '../engine/conduits.js';
+import { deselectRun } from './runpanel.js';
+import { clampCourse, updCourseLabel } from './config.js';
 
-function setVista(v){
+export function setVista(v){
   deselectRun();
   S.vistaMode=v;
   S.is3d=(v==='3d');
@@ -37,7 +40,7 @@ function setVista(v){
   if(isFiada){clampCourse();updCourseLabel();}
   // Elevação
   if(isElev){
-    elevPicking=true; S.currentElevId=null; S.elevOx=0;S.elevOy=0;S.elevSc=1;
+    S.S.elevPicking=true; S.currentElevId=null; S.elevOx=0;S.elevOy=0;S.elevSc=1;
     S.drawing=false;S.dS=null;S.dE=null;
     cv2.style.cursor='default';
     updElevTools();
@@ -82,7 +85,7 @@ document.querySelectorAll('input[name=drawmode]').forEach(r=>{
     updOpeningInfo(); draw2d();
   });
 });
-function updOpeningInfo(){
+export function updOpeningInfo(){
   const v=S.openingSup-S.openingInf;
   const el=document.getElementById('opening-info');
   el.textContent=`vão: ${v} cm`; el.style.color=v<=0?'#c0392b':'#1a5fb4';
@@ -124,7 +127,7 @@ document.querySelectorAll('input[name=fiadatool]').forEach(r=>{
 });
 
 // ── Vista Instalações — subtool ──────────────────────
-function updInstButtons(){
+export function updInstButtons(){
   ['elec','ebox','hidraulica','pipe','gas','gasPipe'].forEach(t=>{
     const btn=document.getElementById('isb-'+t);
     if(btn) btn.classList.toggle('esb-active', S.electricalSubtool===t||
@@ -133,7 +136,7 @@ function updInstButtons(){
   });
   updInstHint();
 }
-function updInstHint(){
+export function updInstHint(){
   const h=document.getElementById('st-inst-hint');
   if(!h) return;
   if(S.pendingConduit){
@@ -158,7 +161,7 @@ function updInstHint(){
   updZbtns();
 }
 
-function updZbtns(){
+export function updZbtns(){
   const zb=document.getElementById('zbtns');
   if(!zb) return;
   const zDests=S.pendingConduit&&S.pendingConduit.validDests?S.pendingConduit.validDests.filter(d=>d.kind==='Z'):[];

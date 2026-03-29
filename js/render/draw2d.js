@@ -1,9 +1,9 @@
 import { S } from '../core/state.js';
-import { CELL, BG, GRID, HOVER_C, BRICK_C, BRICK_HC, HOLE_C, PREV_C, PREV_INV, OPEN_C, OPEN_HC, RUN_HL, DIM_C, GROUT_C, TYPE_COLOR, TYPE_HOLE } from '../constants.js';
+import { CELL, BG, GRID, HOVER_C, BRICK_C, BRICK_HC, HOLE_C, PREV_C, PREV_INV, OPEN_C, OPEN_HC, RUN_HL, DIM_C, GROUT_C, TYPE_COLOR, TYPE_HOLE, EBOX_TYPES } from '../constants.js';
 import { bricks, kk, getCellH } from '../core/history.js';
 import { analyzeCourse, computeGrauteCells, computeGrampos, globalCanalCourses, grampoLenM, countGrampos } from '../engine/modulation.js';
 import { computeConduitCanalCells, computeConduitCanalKeys, CONDUIT_CFG, hitTestEbox, eboxBarRect, drawEboxHighlight, hitTestHydro, hydroBarRect, drawHydroHighlight, hitTestGas, gasBarRect, drawGasHighlight } from '../engine/conduits.js';
-import { drawElevOverlay, drawElevMode } from './elevation.js';
+import { drawElevOverlay, drawElevMode, runPrimaryDir } from './elevation.js';
 
 export const cv2=document.getElementById('cv2'), cx2=cv2.getContext('2d');
 // Initialize S refs so other modules (conduits, elevation) can access them via S.cv2
@@ -15,7 +15,7 @@ function resize2d(){
   if(!S.ox&&!S.oy){S.ox=cv2.width/2;S.oy=cv2.height/2;}
   draw2d();
 }
-window.addEventListener('resize',()=>{if(!S.is3d)resize2d();else resize3d();});
+window.addEventListener('resize',()=>{if(!S.is3d)resize2d();else if(S.r3){const div=document.getElementById('div3d'),W=div.offsetWidth,H=div.offsetHeight;if(W&&H){S.r3.setSize(W,H);S.c3.aspect=W/H;S.c3.updateProjectionMatrix();}}});
 
 const cellAt=(sx,sy)=>({col:Math.floor((sx-S.ox)/S.sc2/CELL),row:Math.floor((sy-S.oy)/S.sc2/CELL)});
 const snapAt=(sx,sy)=>({col:Math.round((sx-S.ox)/S.sc2/CELL),row:Math.round((sy-S.oy)/S.sc2/CELL)});
