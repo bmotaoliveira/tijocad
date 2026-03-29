@@ -74,7 +74,7 @@ document.getElementById('btn-download').addEventListener('click',()=>{
   }
   const d={version:5,brickSize:S.cellCm,brickHeight:S.brickHCm,wallHeight:S.wallHCm,
     bricks:[...bricks()],dimensions:S.dims.map(d=>({pt1:d.pt1,pt2:d.pt2})),
-    wallHeightMap:S.wallHMap,openingMap:S.openMap,doorOrient:S.doorOrient,S.projectName:name,S.slopedKeys:[...S.slopedKeys],elevViews:S.elevViews,S.manualElec:[...S.manualElec],S.manualWater:[...S.manualWater],conduits:S.conduits,bgImage:bgData,
+    wallHeightMap:S.wallHMap,openingMap:S.openMap,doorOrient:S.doorOrient,projectName:name,slopedKeys:[...S.slopedKeys],elevViews:S.elevViews,manualElec:[...S.manualElec],manualWater:[...S.manualWater],conduits:S.conduits,bgImage:bgData,
     settings:{elecLow:S.elecLow,elecMid:S.elecMid,elecHigh:S.elecHigh,hydroLow:S.hydroLow,hydroMid:S.hydroMid,hydroHigh:S.hydroHigh,stdSill:S.stdSill,stdHead:S.stdHead}};
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));

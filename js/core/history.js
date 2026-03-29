@@ -7,7 +7,7 @@ export const getCellH  = k => S.wallHMap[k] !== undefined ? S.wallHMap[k] : S.wa
 
 function getStateStr(){
   return JSON.stringify({brickSize:S.cellCm,brickHeight:S.brickHCm,wallHeight:S.wallHCm,
-    bricks:[...bricks()],dimensions:S.dims,wallHeightMap:S.wallHMap,openingMap:S.openMap,doorOrient:S.doorOrient,projectName:S.projectName,S.slopedKeys:[...S.slopedKeys],elevViews:S.elevViews,S.manualElec:[...S.manualElec],S.manualWater:[...S.manualWater],S.elecBoxes:Object.fromEntries(S.elecBoxes),S.hydroPoints:Object.fromEntries(S.hydroPoints),S.gasPoints:Object.fromEntries(S.gasPoints),conduits:S.conduits,
+    bricks:[...bricks()],dimensions:S.dims,wallHeightMap:S.wallHMap,openingMap:S.openMap,doorOrient:S.doorOrient,projectName:S.projectName,slopedKeys:[...S.slopedKeys],elevViews:S.elevViews,manualElec:[...S.manualElec],manualWater:[...S.manualWater],elecBoxes:Object.fromEntries(S.elecBoxes),hydroPoints:Object.fromEntries(S.hydroPoints),gasPoints:Object.fromEntries(S.gasPoints),conduits:S.conduits,
     settings:{elecLow:S.elecLow,elecMid:S.elecMid,elecHigh:S.elecHigh,hydroLow:S.hydroLow,hydroMid:S.hydroMid,hydroHigh:S.hydroHigh,stdSill:S.stdSill,stdHead:S.stdHead}});
 }
 function markDirty(){
@@ -34,7 +34,7 @@ function doAutosave(){
     localStorage.setItem('tijocad_autosave', JSON.stringify({
       version:5, brickSize:S.cellCm, brickHeight:S.brickHCm, wallHeight:S.wallHCm,
       bricks:[...bricks()], dimensions:S.dims.map(d=>({pt1:d.pt1,pt2:d.pt2})),
-      wallHeightMap:S.wallHMap, openingMap:S.openMap, doorOrient:S.doorOrient, projectName:S.projectName, S.slopedKeys:[...S.slopedKeys], elevViews:S.elevViews, S.manualElec:[...S.manualElec], S.manualWater:[...S.manualWater], S.elecBoxes:Object.fromEntries(S.elecBoxes),S.hydroPoints:Object.fromEntries(S.hydroPoints),S.gasPoints:Object.fromEntries(S.gasPoints), conduits:S.conduits, bgImage:bgData,
+      wallHeightMap:S.wallHMap, openingMap:S.openMap, doorOrient:S.doorOrient, projectName:S.projectName, slopedKeys:[...S.slopedKeys], elevViews:S.elevViews, manualElec:[...S.manualElec], manualWater:[...S.manualWater], elecBoxes:Object.fromEntries(S.elecBoxes),hydroPoints:Object.fromEntries(S.hydroPoints),gasPoints:Object.fromEntries(S.gasPoints), conduits:S.conduits, bgImage:bgData,
       settings:{elecLow:S.elecLow,elecMid:S.elecMid,elecHigh:S.elecHigh,hydroLow:S.hydroLow,hydroMid:S.hydroMid,hydroHigh:S.hydroHigh,stdSill:S.stdSill,stdHead:S.stdHead}
     }));
     showAutosaveToast();
