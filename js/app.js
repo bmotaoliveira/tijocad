@@ -10,6 +10,7 @@ import { updSbBrickInfo, syncPopupPresets, maxCourses } from './ui/config.js';
 import { setVista } from './ui/subheader.js';
 import { bgUpdatePanel } from './features/background.js';
 import { openModal, closeModal } from './ui/modal.js';
+import './features/pdf.js';
 
 // Initialize canvas refs after DOM is ready
 S.cv2 = document.getElementById('cv2');

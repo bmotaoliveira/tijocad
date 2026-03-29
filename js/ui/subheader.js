@@ -26,7 +26,7 @@ export function setVista(v){
   // Raio-X no subheader — só visível na vista 3D
   const gx=document.getElementById('grp-xray');
   if(gx) gx.style.display=S.is3d?'flex':'none';
-  document.getElementById('subheader').classList.toggle('S.is3d',S.is3d);
+  document.getElementById('subheader').classList.toggle('is3d',S.is3d);
   // Sub-tools visibility
   document.getElementById('sub-tools').style.display=S.is3d?'none':'flex';
   document.getElementById('planta-tools').style.display=(isFiada||isElev||isInst)?'none':'flex';

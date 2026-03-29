@@ -234,7 +234,7 @@ cv2.addEventListener('mousedown',e=>{
       e.preventDefault();
       if(!S.elevPicking){
         S.elevPanning=true;S.elevPanSX=e.clientX;S.elevPanSY=e.clientY;
-        S.elevPanOX=S.elevOx;S.elevPanOY=S.elevOy;cv2.classList.add('S.panning');
+        S.elevPanOX=S.elevOx;S.elevPanOY=S.elevOy;cv2.classList.add('panning');
       }
     }
     return;
@@ -242,7 +242,7 @@ cv2.addEventListener('mousedown',e=>{
 
   // ── Vista Instalações ──
   if(S.vistaMode==='inst'){
-    if(e.button===1){e.preventDefault();S.panning=true;S.panSX=e.clientX;S.panSY=e.clientY;S.panOX=S.ox;S.panOY=S.oy;cv2.classList.add('S.panning');return;}
+    if(e.button===1){e.preventDefault();S.panning=true;S.panSX=e.clientX;S.panSY=e.clientY;S.panOX=S.ox;S.panOY=S.oy;cv2.classList.add('panning');return;}
     if(e.button===2){
       e.preventDefault();
       const rect=cv2.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top;
@@ -367,7 +367,7 @@ cv2.addEventListener('mousedown',e=>{
     return;
   }
   const rect=cv2.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top;
-  if(e.button===1){e.preventDefault();S.panning=true;S.panSX=e.clientX;S.panSY=e.clientY;S.panOX=S.ox;S.panOY=S.oy;cv2.classList.add('S.panning');return;}
+  if(e.button===1){e.preventDefault();S.panning=true;S.panSX=e.clientX;S.panSY=e.clientY;S.panOX=S.ox;S.panOY=S.oy;cv2.classList.add('panning');return;}
   if(e.button===0&&S.heightMode){e.preventDefault();const c=cellAt(sx,sy);if(bricks().has(kk(c.col,c.row)))openHpop(c.col,c.row,e.clientX,e.clientY);return;}
   // Deselecionar cota ao clicar fora dela
   if(e.button===0&&S.hovDim<0&&S.selDim>=0){S.selDim=-1;draw2d();}
@@ -455,7 +455,7 @@ cv2.addEventListener('mousedown',e=>{
 
 window.addEventListener('mouseup',e=>{
   if(S.bgImg.dragging||S.bgImg.resizing){bgEndDrag();return;}
-  if(e.button===1&&S.panning){S.panning=false;cv2.classList.remove('S.panning');}
+  if(e.button===1&&S.panning){S.panning=false;cv2.classList.remove('panning');}
 
   // ── Commit stretch ──
   if(e.button===0&&S.stretchMode){
@@ -573,7 +573,7 @@ cv2.addEventListener('mousedown',e=>{
     S.elevPanning=true;
     S.elevPanSX=e.clientX; S.elevPanSY=e.clientY;
     S.elevPanOX=S.elevOx; S.elevPanOY=S.elevOy;
-    cv2.classList.add('S.panning');
+    cv2.classList.add('panning');
   }
 },{capture:true, passive:false});
 
@@ -587,7 +587,7 @@ window.addEventListener('mousemove',e=>{
 window.addEventListener('mouseup',e=>{
   if(e.button===1&&S.elevPanning){
     S.elevPanning=false;
-    cv2.classList.remove('S.panning');
+    cv2.classList.remove('panning');
   }
 },{capture:false});
 
