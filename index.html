@@ -797,6 +797,24 @@
 
 
 
+  <!-- Error diagnostics: show module load errors visually -->
+  <script>
+    window.__modErr = [];
+    window.addEventListener('error', e => {
+      if (e.filename && e.filename.includes('.js')) {
+        window.__modErr.push((e.filename.split('/').slice(-2).join('/')) + ':' + e.lineno + ' — ' + e.message);
+        document.getElementById('mod-err-box').textContent = window.__modErr.join('\n');
+        document.getElementById('mod-err-box').style.display = 'block';
+      }
+    });
+    window.addEventListener('unhandledrejection', e => {
+      window.__modErr.push('Promise: ' + (e.reason?.message || e.reason));
+      document.getElementById('mod-err-box').textContent = window.__modErr.join('\n');
+      document.getElementById('mod-err-box').style.display = 'block';
+    });
+  </script>
+  <div id="mod-err-box" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#c00;color:#fff;font:12px monospace;padding:8px;z-index:9999;white-space:pre-wrap;max-height:200px;overflow:auto;"></div>
+
   <!-- Load event modules (register listeners for canvas, keyboard, etc.) -->
   <script type="module" src="js/events/canvas.js"></script>
   <script type="module" src="js/events/keyboard.js"></script>
